@@ -19,7 +19,6 @@ export async function uniffiInitAsync() {
   latex_wrapper.default.initialize();
 }
 
-
 // Export the crates as individually namespaced objects.
 export default {
   latex_wrapper,

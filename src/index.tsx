@@ -34,7 +34,6 @@ export async function uniffiInitAsync() {
   // NOOP.
 }
 
-
 // Export the crates as individually namespaced objects.
 export default {
   latex_wrapper,
