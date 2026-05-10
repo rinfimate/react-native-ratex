@@ -1,0 +1,9 @@
+rust:
+  directory: ./rust
+  manifestPath: latex_wrapper/Cargo.toml
+
+bindings:
+  ts: src/generated/rn
+
+web:
+  ts: src/generated/web

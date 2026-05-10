@@ -1,0 +1,17 @@
+node_modules/
+lib/
+android/build/
+android/generated/
+android/src/main/jniLibs/
+android/src/main/assets/fonts/
+ios/build/
+ios/generated/
+ios/Fonts/
+ios/Pods/
+cpp/
+src/generated/
+rust/latex_wrapper/target/
+rust_modules/
+RatexFramework.xcframework/
+*.tgz
+.DS_Store
