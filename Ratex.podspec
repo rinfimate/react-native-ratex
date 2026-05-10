@@ -15,7 +15,9 @@ Pod::Spec.new do |s|
   s.platforms    = { :ios => min_ios_version_supported }
   s.source       = { :git => "https://github.com/rinfimate/react-native-ratex.git", :tag => "#{s.version}" }
 
-  s.source_files = "ios/**/*.{h,m,mm,swift}", "cpp/**/*.{hpp,cpp,c,h}"
+  # Exclude Swift view files — RatexView native component not yet implemented for iOS
+  s.source_files = "ios/**/*.{h,m,mm}", "cpp/**/*.{hpp,cpp,c,h}"
+  s.exclude_files = "ios/DisplayList.swift", "ios/RatexEngine.swift", "ios/RatexFontLoader.swift", "ios/RatexRenderer.swift"
   s.vendored_frameworks = "RatexFramework.xcframework"
   s.dependency    "uniffi-bindgen-react-native", "0.31.0-2"
 
