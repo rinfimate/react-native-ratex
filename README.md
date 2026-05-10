@@ -26,12 +26,16 @@ Every other LaTeX solution for React Native requires MathJax running in a WebVie
 ## Installation
 
 ```sh
+# npm
+npm install react-native-ratex react-native-svg
+
+# yarn
 yarn add react-native-ratex react-native-svg
 ```
 
 > **Requirements:**
 > - **Android:** React Native ≥ 0.73, New Architecture enabled. On RN 0.73–0.75 set `newArchEnabled=true` in `android/gradle.properties` — it is the default from RN 0.76+.
-> - **iOS:** React Native ≥ 0.73 with New Architecture.
+> - **iOS:** React Native ≥ 0.73 with New Architecture. On RN 0.73–0.75 add `ENV['RCT_NEW_ARCH_ENABLED'] = '1'` to your `Podfile` before `use_react_native!`, then run `npx pod-install`.
 > - **Web:** any bundler supporting WebAssembly (Metro, Vite, webpack).
 
 ---
@@ -112,7 +116,11 @@ renderToSvg('\\frac{1}{2}', true, 40)   // \f → form feed on Android/iOS
 renderToSvg('\\theta', true, 40)         // \t → tab on Android/iOS
 ```
 
-> **Note:** The library includes a Rust-level guard that converts known control characters back to their LaTeX equivalents, but `String.raw` is the recommended and most reliable approach — especially for dynamic strings.
+> **Note:** The library includes a Rust-level guard that converts known control characters back to their LaTeX equivalents. For **dynamic strings** (e.g. from an API or user input) where `String.raw` isn't available, use:
+> ```typescript
+> const BS = String.fromCharCode(92); // literal backslash
+> const formula = `${BS}frac{1}{2} + ${BS}frac{1}{3}`;
+> ```
 
 ---
 
@@ -202,7 +210,8 @@ newArchEnabled=true
 |------|---------|
 | [Rust](https://rustup.rs) | Compile the Rust crate |
 | [Node.js](https://nodejs.org) ≥ 18 | JS toolchain |
-| Android Studio + NDK | Android cross-compilation |
+| Android Studio + NDK 27 | Android cross-compilation |
+| [cargo-ndk](https://github.com/bbqsrc/cargo-ndk) | Android NDK target helper (`cargo install cargo-ndk`) |
 | Xcode ≥ 15 | iOS builds (macOS only) |
 | [wasm-pack](https://rustwasm.github.io/wasm-pack/) | WASM build |
 
@@ -232,4 +241,4 @@ MIT © 2026 Rochanglien Infimate — see [LICENSE](LICENSE)
 
 ## Credits
 
-Built on [RaTeX](https://github.com/rinfimate/RaTeX) by [@erweixin](https://github.com/erweixin). Wrapper pattern based on [react-native-ariel](https://github.com/rinfimate/ariel).
+Built on [RaTeX](https://github.com/rinfimate/RaTeX) (fork of [@erweixin/RaTeX](https://github.com/erweixin/RaTeX)). Wrapper pattern based on [react-native-ariel](https://github.com/rinfimate/ariel). Uses [uniffi-bindgen-react-native](https://github.com/jhugman/uniffi-bindgen-react-native) for the Rust↔JS bridge.
