@@ -19,7 +19,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: rust/latex_wrapper
-      - run: cargo test --manifest-path rust/latex_wrapper/Cargo.toml
+      # --lib avoids doctest ambiguity between local wrapper and git dep (both named latex_wrapper)
+      - run: cargo test --manifest-path rust/latex_wrapper/Cargo.toml --lib
 
   # ── Build Android .a static libs (Ubuntu + NDK cross-compile) ────────────
   build-android:
