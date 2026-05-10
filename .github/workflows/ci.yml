@@ -1,0 +1,234 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  release:
+    types: [created, published]
+
+jobs:
+  # ── Rust unit tests ───────────────────────────────────────────────────────
+  test-rust:
+    name: Rust unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust/latex_wrapper
+      - run: cargo test --manifest-path rust/latex_wrapper/Cargo.toml
+
+  # ── Build Android .a static libs (Ubuntu + NDK cross-compile) ────────────
+  build-android:
+    name: Build Android
+    runs-on: ubuntu-latest
+    needs: test-rust
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust/latex_wrapper
+      - run: cargo install cargo-ndk --locked
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: temurin
+      - uses: android-actions/setup-android@v3
+      - run: |
+          sdkmanager "ndk;27.0.12077973"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/27.0.12077973" >> $GITHUB_ENV
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install
+      - run: npm run ubrn:generate
+      - name: Build
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            npm run ubrn:android
+          else
+            npm run ubrn:android -- --release
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          name: android-libs
+          path: android/src/main/jniLibs/
+          retention-days: 7
+      - name: Upload RN TypeScript bindings
+        uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          name: ts-bindings-rn
+          path: src/generated/rn/
+          retention-days: 7
+      - name: Upload Android native source
+        uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          name: android-native-src
+          path: |
+            android/src/main/java/
+            android/CMakeLists.txt
+            android/cpp-adapter.cpp
+            cpp/
+          retention-days: 7
+
+  # ── Build iOS xcframework (macOS) ─────────────────────────────────────────
+  build-ios:
+    name: Build iOS
+    runs-on: macos-latest
+    needs: test-rust
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios,x86_64-apple-ios,aarch64-apple-ios-sim
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust/latex_wrapper
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install
+      - run: npm run ubrn:generate
+      - name: Build
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            npm run ubrn:ios
+          else
+            npm run ubrn:ios -- --release
+          fi
+      - name: Add x86_64 simulator slice to xcframework
+        run: |
+          XCFW=RatexFramework.xcframework
+          ARM64_SIM="$XCFW/ios-arm64-simulator/liblatex_wrapper.a"
+          FAT_DIR="$XCFW/ios-arm64_x86_64-simulator"
+
+          cargo build --manifest-path rust/latex_wrapper/Cargo.toml --target x86_64-apple-ios --release 2>/dev/null || \
+          cargo build --manifest-path rust/latex_wrapper/Cargo.toml --target x86_64-apple-ios
+
+          X86_LIB="rust/latex_wrapper/target/x86_64-apple-ios/release/liblatex_wrapper.a"
+          [ -f "$X86_LIB" ] || X86_LIB="rust/latex_wrapper/target/x86_64-apple-ios/debug/liblatex_wrapper.a"
+
+          if [ -f "$X86_LIB" ] && [ -f "$ARM64_SIM" ]; then
+            mkdir -p "$FAT_DIR"
+            lipo -create "$ARM64_SIM" "$X86_LIB" -output "$FAT_DIR/liblatex_wrapper.a"
+            rm -rf "$XCFW/ios-arm64-simulator"
+            /usr/libexec/PlistBuddy -c "Delete :AvailableLibraries:0" "$XCFW/Info.plist"
+            /usr/libexec/PlistBuddy -c "Add :AvailableLibraries:0 dict" "$XCFW/Info.plist"
+            /usr/libexec/PlistBuddy -c "Add :AvailableLibraries:0:BinaryPath string liblatex_wrapper.a" "$XCFW/Info.plist"
+            /usr/libexec/PlistBuddy -c "Add :AvailableLibraries:0:LibraryIdentifier string ios-arm64_x86_64-simulator" "$XCFW/Info.plist"
+            /usr/libexec/PlistBuddy -c "Add :AvailableLibraries:0:LibraryPath string liblatex_wrapper.a" "$XCFW/Info.plist"
+            /usr/libexec/PlistBuddy -c "Add :AvailableLibraries:0:SupportedArchitectures array" "$XCFW/Info.plist"
+            /usr/libexec/PlistBuddy -c "Add :AvailableLibraries:0:SupportedArchitectures:0 string arm64" "$XCFW/Info.plist"
+            /usr/libexec/PlistBuddy -c "Add :AvailableLibraries:0:SupportedArchitectures:1 string x86_64" "$XCFW/Info.plist"
+            /usr/libexec/PlistBuddy -c "Add :AvailableLibraries:0:SupportedPlatform string ios" "$XCFW/Info.plist"
+            /usr/libexec/PlistBuddy -c "Add :AvailableLibraries:0:SupportedPlatformVariant string simulator" "$XCFW/Info.plist"
+            echo "Created fat simulator slice (arm64 + x86_64)"
+          else
+            echo "Skipping fat slice — x86_64 lib not found"
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          name: ios-xcframework
+          path: |
+            ios/
+            cpp/
+            RatexFramework.xcframework/
+          retention-days: 7
+
+  # ── Build WASM bundle (Ubuntu) ────────────────────────────────────────────
+  build-web:
+    name: Build Web (WASM)
+    runs-on: ubuntu-latest
+    needs: test-rust
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            rust/latex_wrapper
+            rust_modules/wasm
+      - run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install
+      - run: npm run ubrn:generate
+      - name: Build
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            npm run ubrn:web
+          else
+            npm run ubrn:web-release
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          overwrite: true
+          name: wasm-bindings
+          path: src/generated/web/
+          retention-days: 7
+
+  # ── Publish to npm ────────────────────────────────────────────────────────
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    needs: [build-android, build-ios, build-web]
+    if: github.event_name == 'push' || github.event_name == 'release'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm install
+      - name: Download Android libs
+        uses: actions/download-artifact@v4
+        with:
+          name: android-libs
+          path: android/src/main/jniLibs/
+      - name: Download iOS xcframework
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-xcframework
+      - name: Download WASM bindings
+        uses: actions/download-artifact@v4
+        with:
+          name: wasm-bindings
+          path: src/generated/web/
+      - name: Download RN TypeScript bindings
+        uses: actions/download-artifact@v4
+        with:
+          name: ts-bindings-rn
+          path: src/generated/rn/
+      - name: Download Android native source
+        uses: actions/download-artifact@v4
+        with:
+          name: android-native-src
+      - run: npm run prepare
+      - name: Set version and npm tag
+        id: versioning
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            npm version ${{ github.event.release.tag_name }} --no-git-tag-version --allow-same-version
+            echo "npm_tag=latest" >> $GITHUB_OUTPUT
+          else
+            BASE=$(node -p "require('./package.json').version")
+            npm version "${BASE}-dev.${{ github.run_number }}" --no-git-tag-version
+            echo "npm_tag=next" >> $GITHUB_OUTPUT
+          fi
+      - name: Publish
+        run: npm publish --access public --tag ${{ steps.versioning.outputs.npm_tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
