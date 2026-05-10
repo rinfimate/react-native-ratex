@@ -228,7 +228,7 @@ npm run prepare
 
 ## License
 
-MIT — see [LICENSE](LICENSE)
+MIT © 2026 Rochanglien Infimate — see [LICENSE](LICENSE)
 
 ## Credits
 
