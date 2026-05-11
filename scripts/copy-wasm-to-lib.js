@@ -17,7 +17,7 @@ if (!fs.existsSync(src)) {
 fs.mkdirSync(dest, { recursive: true });
 let copied = 0;
 for (const file of fs.readdirSync(src)) {
-  if (file.startsWith('.')) continue;
+  if (file.startsWith('.')) continue; // skip dotfiles (.gitignore etc)
   fs.copyFileSync(path.join(src, file), path.join(dest, file));
   copied++;
 }

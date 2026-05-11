@@ -1,3 +1,4 @@
+---
 rust:
   directory: ./rust
   manifestPath: ratex_wrapper/Cargo.toml
