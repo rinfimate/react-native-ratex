@@ -101,8 +101,18 @@
     "output": "lib",
     "exclude": "generated/web/wasm-bindgen/**",
     "targets": [
-      ["module", { "esm": true }],
-      ["typescript", { "project": "tsconfig.build.json" }],
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ],
+      [
+        "typescript",
+        {
+          "project": "tsconfig.build.json"
+        }
+      ],
       "codegen"
     ]
   },
