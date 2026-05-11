@@ -5,6 +5,7 @@ module.exports = {
   dependency: {
     platforms: {
       android: {
+        cmakeListsPath: 'generated/jni/CMakeLists.txt',
         cxxModuleCMakeListsModuleName: 'react-native-ratex',
         cxxModuleCMakeListsPath: 'CMakeLists.txt',
       },

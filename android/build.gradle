@@ -28,9 +28,7 @@ def isNewArchitectureEnabled() {
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 
-if (isNewArchitectureEnabled()) {
-  apply plugin: "com.facebook.react"
-}
+apply plugin: "com.facebook.react"
 
 def getExtOrDefault(name) {
   return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties["Ratex_" + name]
@@ -110,11 +108,11 @@ android {
 
   sourceSets {
     main {
-      // generated/java always included — NativeRatexSpec.java is pre-shipped
-      // (includesGeneratedCode=true means build-time codegen is skipped)
-      java.srcDirs += ["generated/java"]
       if (isNewArchitectureEnabled()) {
-          java.srcDirs += ["generated/jni"]
+          java.srcDirs += [
+            "generated/java",
+            "generated/jni"
+          ]
       }
     }
   }
@@ -135,10 +133,8 @@ dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 
-if (isNewArchitectureEnabled()) {
-  react {
-    jsRootDir = file("../src/")
-    libraryName = "Ratex"
-    codegenJavaPackageName = "com.ratex"
-  }
+react {
+  jsRootDir = file("../src/")
+  libraryName = "Ratex"
+  codegenJavaPackageName = "com.ratex"
 }
