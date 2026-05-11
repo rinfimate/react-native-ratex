@@ -109,7 +109,7 @@
     "android": {
       "javaPackageName": "com.ratex"
     },
-    "includesGeneratedCode": false
+    "includesGeneratedCode": true
   },
   "dependencies": {
     "uniffi-bindgen-react-native": "^0.31.0-2"
