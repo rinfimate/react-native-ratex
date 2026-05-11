@@ -87,12 +87,8 @@ nitrogen/
 
 # uniffi-bindgen-react-native — generated native code (rebuilt by ubrn:android/ios/web)
 cpp/
-ios/generated/
-ios/build/
-ios/Pods/
+/ios/
 android/CMakeLists.txt
-android/generated/
-android/src/main/jniLibs/
 src/generated/
 RatexFramework.xcframework/
 
