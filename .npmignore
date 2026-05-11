@@ -1,0 +1,12 @@
+# When .npmignore is present, npm uses it instead of .gitignore.
+# The files field in package.json still restricts what is published —
+# this file only prevents .gitignore from excluding src/generated/.
+
+# Rust build artifacts
+rust/latex_wrapper/target/
+rust_modules/wasm/target/
+
+# Dev-only directories (not in package.json files field anyway)
+.claude/
+.github/
+scripts/
