@@ -111,24 +111,24 @@ jobs:
         run: |
           # ubrn only produces arm64-simulator; combine with x86_64 for universal simulator support
           XCFW=RatexFramework.xcframework
-          ARM64_SIM="$XCFW/ios-arm64-simulator/liblatex_wrapper.a"
+          ARM64_SIM="$XCFW/ios-arm64-simulator/libratex_wrapper.a"
           X86_SIM_DIR="$XCFW/ios-x86_64-simulator"
           FAT_DIR="$XCFW/ios-arm64_x86_64-simulator"
           # Build x86_64 simulator slice (already compiled by rustup target)
           cargo build --manifest-path rust/ratex_wrapper/Cargo.toml --target x86_64-apple-ios --release 2>/dev/null || \
           cargo build --manifest-path rust/ratex_wrapper/Cargo.toml --target x86_64-apple-ios
-          X86_LIB="rust/ratex_wrapper/target/x86_64-apple-ios/release/liblatex_wrapper.a"
-          [ -f "$X86_LIB" ] || X86_LIB="rust/ratex_wrapper/target/x86_64-apple-ios/debug/liblatex_wrapper.a"
+          X86_LIB="rust/ratex_wrapper/target/x86_64-apple-ios/release/libratex_wrapper.a"
+          [ -f "$X86_LIB" ] || X86_LIB="rust/ratex_wrapper/target/x86_64-apple-ios/debug/libratex_wrapper.a"
           if [ -f "$X86_LIB" ] && [ -f "$ARM64_SIM" ]; then
             mkdir -p "$FAT_DIR"
-            lipo -create "$ARM64_SIM" "$X86_LIB" -output "$FAT_DIR/liblatex_wrapper.a"
+            lipo -create "$ARM64_SIM" "$X86_LIB" -output "$FAT_DIR/libratex_wrapper.a"
             rm -rf "$XCFW/ios-arm64-simulator"
             # Update Info.plist for fat simulator slice
             /usr/libexec/PlistBuddy -c "Delete :AvailableLibraries:0" "$XCFW/Info.plist"
             /usr/libexec/PlistBuddy -c "Add :AvailableLibraries:0 dict" "$XCFW/Info.plist"
-            /usr/libexec/PlistBuddy -c "Add :AvailableLibraries:0:BinaryPath string liblatex_wrapper.a" "$XCFW/Info.plist"
+            /usr/libexec/PlistBuddy -c "Add :AvailableLibraries:0:BinaryPath string libratex_wrapper.a" "$XCFW/Info.plist"
             /usr/libexec/PlistBuddy -c "Add :AvailableLibraries:0:LibraryIdentifier string ios-arm64_x86_64-simulator" "$XCFW/Info.plist"
-            /usr/libexec/PlistBuddy -c "Add :AvailableLibraries:0:LibraryPath string liblatex_wrapper.a" "$XCFW/Info.plist"
+            /usr/libexec/PlistBuddy -c "Add :AvailableLibraries:0:LibraryPath string libratex_wrapper.a" "$XCFW/Info.plist"
             /usr/libexec/PlistBuddy -c "Add :AvailableLibraries:0:SupportedArchitectures array" "$XCFW/Info.plist"
             /usr/libexec/PlistBuddy -c "Add :AvailableLibraries:0:SupportedArchitectures:0 string arm64" "$XCFW/Info.plist"
             /usr/libexec/PlistBuddy -c "Add :AvailableLibraries:0:SupportedArchitectures:1 string x86_64" "$XCFW/Info.plist"

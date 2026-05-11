@@ -23,6 +23,12 @@ execSync('cargo build --manifest-path rust/ratex_wrapper/Cargo.toml', {
   cwd: root,
 });
 
+// ── Clean stale cpp files from previous crate name ───────────────────────────
+['latex_wrapper.cpp', 'latex_wrapper.hpp'].forEach(file => {
+  const stale = path.join(root, 'cpp', file);
+  if (fs.existsSync(stale)) { fs.rmSync(stale); console.log(`[ratex] Removed stale cpp/${file}`); }
+});
+
 // ── Step 2: Generate JSI (React Native) bindings ─────────────────────────────
 console.log('\n[ratex] Generating JSI bindings…');
 execSync(
