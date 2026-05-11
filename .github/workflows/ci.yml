@@ -19,8 +19,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: rust/latex_wrapper
-      # --lib avoids doctest ambiguity between local wrapper and git dep (both named latex_wrapper)
-      - run: cargo test --manifest-path rust/latex_wrapper/Cargo.toml --lib
+      - run: cargo test --manifest-path rust/latex_wrapper/Cargo.toml
 
   # ── Build Android .a static libs (Ubuntu + NDK cross-compile) ────────────
   build-android:
@@ -47,14 +46,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --ignore-scripts
-      - run: npm run ubrn:generate
+      - run: corepack enable
+      - run: yarn install --immutable
+      - run: yarn ubrn:generate
       - name: Build
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            npm run ubrn:android
+            yarn ubrn:android
           else
-            npm run ubrn:android -- --release
+            yarn ubrn:android --release
           fi
       - uses: actions/upload-artifact@v4
         with:
@@ -62,14 +62,14 @@ jobs:
           name: android-libs
           path: android/src/main/jniLibs/
           retention-days: 7
-      - name: Upload RN TypeScript bindings
+      - name: Upload RN TypeScript bindings (used by publish)
         uses: actions/upload-artifact@v4
         with:
           overwrite: true
           name: ts-bindings-rn
           path: src/generated/rn/
           retention-days: 7
-      - name: Upload Android native source
+      - name: Upload Android native source (RatexModule.kt, CMakeLists.txt, cpp/)
         uses: actions/upload-artifact@v4
         with:
           overwrite: true
@@ -81,7 +81,7 @@ jobs:
             cpp/
           retention-days: 7
 
-  # ── Build iOS xcframework (macOS) ─────────────────────────────────────────
+  # ── Build iOS xcframework (macOS — free on public repos) ─────────────────
   build-ios:
     name: Build iOS
     runs-on: macos-latest
@@ -97,31 +97,33 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --ignore-scripts
-      - run: npm run ubrn:generate
+      - run: corepack enable
+      - run: yarn install --immutable
+      - run: yarn ubrn:generate
       - name: Build
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            npm run ubrn:ios
+            yarn ubrn:ios-ci
           else
-            npm run ubrn:ios -- --release
+            yarn ubrn:ios-ci --release
           fi
       - name: Add x86_64 simulator slice to xcframework
         run: |
+          # ubrn only produces arm64-simulator; combine with x86_64 for universal simulator support
           XCFW=RatexFramework.xcframework
           ARM64_SIM="$XCFW/ios-arm64-simulator/liblatex_wrapper.a"
+          X86_SIM_DIR="$XCFW/ios-x86_64-simulator"
           FAT_DIR="$XCFW/ios-arm64_x86_64-simulator"
-
+          # Build x86_64 simulator slice (already compiled by rustup target)
           cargo build --manifest-path rust/latex_wrapper/Cargo.toml --target x86_64-apple-ios --release 2>/dev/null || \
           cargo build --manifest-path rust/latex_wrapper/Cargo.toml --target x86_64-apple-ios
-
           X86_LIB="rust/latex_wrapper/target/x86_64-apple-ios/release/liblatex_wrapper.a"
           [ -f "$X86_LIB" ] || X86_LIB="rust/latex_wrapper/target/x86_64-apple-ios/debug/liblatex_wrapper.a"
-
           if [ -f "$X86_LIB" ] && [ -f "$ARM64_SIM" ]; then
             mkdir -p "$FAT_DIR"
             lipo -create "$ARM64_SIM" "$X86_LIB" -output "$FAT_DIR/liblatex_wrapper.a"
             rm -rf "$XCFW/ios-arm64-simulator"
+            # Update Info.plist for fat simulator slice
             /usr/libexec/PlistBuddy -c "Delete :AvailableLibraries:0" "$XCFW/Info.plist"
             /usr/libexec/PlistBuddy -c "Add :AvailableLibraries:0 dict" "$XCFW/Info.plist"
             /usr/libexec/PlistBuddy -c "Add :AvailableLibraries:0:BinaryPath string liblatex_wrapper.a" "$XCFW/Info.plist"
@@ -165,14 +167,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --ignore-scripts
-      - run: npm run ubrn:generate
+      - run: corepack enable
+      - run: yarn install --immutable
+      - run: yarn ubrn:generate
       - name: Build
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            npm run ubrn:web
+            yarn ubrn:web
           else
-            npm run ubrn:web-release
+            yarn ubrn:web-release
           fi
       - uses: actions/upload-artifact@v4
         with:
@@ -181,7 +184,14 @@ jobs:
           path: src/generated/web/
           retention-days: 7
 
+  # ── Example builds disabled temporarily ──────────────────────────────────
+  # build-example-android, build-example-ios, build-example-web
+  # TODO: re-enable once Android autolinking fixes are verified
+
   # ── Publish to npm ────────────────────────────────────────────────────────
+  # Runs after all 3 builds. Skipped on pull requests.
+  # push to master  → publishes 0.x.x-dev.N with tag "next"
+  # GitHub release → publishes 0.x.x with tag "latest"
   publish:
     name: Publish to npm
     runs-on: ubuntu-latest
@@ -192,8 +202,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
-      - run: npm install --ignore-scripts
+      - run: corepack enable
+      - run: yarn install --immutable
       - name: Download Android libs
         uses: actions/download-artifact@v4
         with:
@@ -213,11 +223,11 @@ jobs:
         with:
           name: ts-bindings-rn
           path: src/generated/rn/
-      - name: Download Android native source
+      - name: Download Android native source (RatexModule.kt, CMakeLists.txt, cpp/)
         uses: actions/download-artifact@v4
         with:
           name: android-native-src
-      - run: npm run prepare
+      - run: yarn prepare
       - name: Set version and npm tag
         id: versioning
         run: |
@@ -230,6 +240,6 @@ jobs:
             echo "npm_tag=next" >> $GITHUB_OUTPUT
           fi
       - name: Publish
-        run: npm publish --access public --tag ${{ steps.versioning.outputs.npm_tag }}
+        run: yarn npm publish --access public --tag ${{ steps.versioning.outputs.npm_tag }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

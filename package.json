@@ -24,9 +24,7 @@
     "*.podspec",
     "react-native.config.js",
     "!ios/build",
-    "!ios/generated",
     "!android/build",
-    "!android/generated/java",
     "!android/gradle",
     "!android/gradlew",
     "!android/gradlew.bat",
@@ -40,10 +38,13 @@
     "clean": "del-cli android/build lib",
     "prepare": "bob build && node scripts/copy-wasm-to-lib.js",
     "typecheck": "tsc",
+    "test": "jest",
     "ubrn:ios": "ubrn build ios",
+    "ubrn:ios-ci": "ubrn build ios",
     "ubrn:android": "ubrn build android",
     "ubrn:web": "wasm-pack build rust_modules/wasm --target web --out-dir ../../src/generated/web/wasm-bindgen && node scripts/patch-wasm.js",
     "ubrn:web-release": "wasm-pack build rust_modules/wasm --target web --release --out-dir ../../src/generated/web/wasm-bindgen && node scripts/patch-wasm.js",
+    "ubrn:checkout": "ubrn checkout",
     "ubrn:clean": "del-cli cpp ios src/generated src/Native* src/index.*ts*",
     "ubrn:generate": "node scripts/generate-bindings.js"
   },
@@ -76,18 +77,25 @@
     "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {
+    "@jest/globals": "^30.0.0",
+    "@react-native-community/cli": "20.1.0",
     "@react-native/babel-preset": "0.77.0",
     "@types/react": "^18.3.0",
     "del-cli": "^7.0.0",
+    "jest": "^30.3.0",
+    "prettier": "^3.8.3",
     "react": "18.3.1",
     "react-native": "0.77.0",
     "react-native-builder-bob": "^0.41.0",
+    "turbo": "^2.8.21",
     "typescript": "^6.0.2"
   },
   "peerDependencies": {
     "react": "*",
-    "react-native": ">=0.73.0"
+    "react-native": ">=0.73.0",
+    "react-native-svg": ">=13.0.0"
   },
+  "packageManager": "yarn@4.11.0",
   "react-native-builder-bob": {
     "source": "src",
     "output": "lib",
@@ -110,6 +118,23 @@
       "javaPackageName": "com.ratex"
     },
     "includesGeneratedCode": true
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {
+      "^.+\\.(ts|tsx|js|jsx)$": "babel-jest"
+    },
+    "modulePathIgnorePatterns": [
+      "<rootDir>/lib/"
+    ]
+  },
+  "create-react-native-library": {
+    "type": "turbo-module",
+    "languages": "cpp",
+    "tools": [
+      "jest"
+    ],
+    "version": "0.62.0"
   },
   "dependencies": {
     "uniffi-bindgen-react-native": "^0.31.0-2"

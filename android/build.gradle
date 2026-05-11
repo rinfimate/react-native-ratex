@@ -118,6 +118,12 @@ android {
   }
 }
 
+android {
+  packagingOptions {
+    excludes += ['lib/*/libjsi.so', 'lib/*/libturbomodulejsijni.so', 'lib/*/libreact_nativemodule_core.so']
+  }
+}
+
 repositories {
   mavenCentral()
   google()

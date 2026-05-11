@@ -1,4 +1,4 @@
 {
   "extends": "./tsconfig",
-  "exclude": ["lib", "src/generated/web/wasm-bindgen/**", "src/index.web.tsx", "src/index.web.ts", "src/RatexView.web.tsx"]
+  "exclude": ["lib", "src/generated/web/wasm-bindgen/**", "src/index.web.tsx", "src/index.web.ts"]
 }
