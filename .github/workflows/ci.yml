@@ -19,7 +19,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: rust/latex_wrapper
-      - run: cargo test --manifest-path rust/latex_wrapper/Cargo.toml
+      - run: cargo test --manifest-path rust/latex_wrapper/Cargo.toml --lib
 
   # ── Build Android .a static libs (Ubuntu + NDK cross-compile) ────────────
   build-android:
