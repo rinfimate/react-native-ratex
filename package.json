@@ -1,6 +1,6 @@
 {
   "name": "react-native-ratex",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "LaTeX renderer for React Native and React Native Web. No DOM. No WebView. Pure Rust.",
   "main": "./lib/module/index.js",
   "source": "./src/index.tsx",
