@@ -110,11 +110,11 @@ android {
 
   sourceSets {
     main {
+      // generated/java always included — NativeRatexSpec.java is pre-shipped
+      // (includesGeneratedCode=true means build-time codegen is skipped)
+      java.srcDirs += ["generated/java"]
       if (isNewArchitectureEnabled()) {
-          java.srcDirs += [
-            "generated/java",
-            "generated/jni"
-          ]
+          java.srcDirs += ["generated/jni"]
       }
     }
   }
