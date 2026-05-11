@@ -97,7 +97,7 @@ src/generated/
 RatexFramework.xcframework/
 
 # Rust build artifacts inside the library
-rust/latex_wrapper/target/
+rust/ratex_wrapper/target/
 rust_modules/wasm/target/
 
 # Static libs produced by ubrn

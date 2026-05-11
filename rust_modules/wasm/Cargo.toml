@@ -11,7 +11,7 @@ crate-type = ["cdylib", "rlib"]
 default = []
 
 [dependencies]
-latex_wrapper = { path = "../../rust/latex_wrapper" }
+ratex_wrapper = { path = "../../rust/ratex_wrapper" }
 # Use the runtime crate that ships with the current UBRN install so the
 # generated wasm crate stays in lock-step with the CLI/runtime implementation.
 uniffi-runtime-javascript = { path = "../../node_modules/uniffi-bindgen-react-native/crates/uniffi-runtime-javascript", features = ["wasm32"] }

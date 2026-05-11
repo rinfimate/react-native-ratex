@@ -11,19 +11,19 @@ if (!rustInstalled) {
 }
 
 // Export the generated bindings to the app.
-export * from './generated/rn/latex_wrapper';
+export * from './generated/rn/ratex_wrapper';
 
 // Now import the bindings so we can:
 // - intialize them
 // - export them as namespaced objects as the default export.
-import * as latex_wrapper from './generated/rn/latex_wrapper';
+import * as ratex_wrapper from './generated/rn/ratex_wrapper';
 
 // Initialize the generated bindings: mostly checksums, but also callbacks.
 // - the boolean flag ensures this loads exactly once, even if the JS code
 //   is reloaded (e.g. during development with metro).
 let initialized = false;
 if (!initialized) {
-  latex_wrapper.default.initialize();
+  ratex_wrapper.default.initialize();
   initialized = true;
 }
 
@@ -36,6 +36,6 @@ export async function uniffiInitAsync() {
 
 // Export the crates as individually namespaced objects.
 export default {
-  latex_wrapper,
+  ratex_wrapper,
 };
 

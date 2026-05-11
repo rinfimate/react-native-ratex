@@ -1,5 +1,5 @@
 [package]
-name = "latex_wrapper"
+name = "ratex_wrapper"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,4 +8,5 @@ crate-type = ["cdylib", "staticlib", "rlib"]
 
 [dependencies]
 latex_wrapper = { git = "https://github.com/rinfimate/RaTeX", branch = "main" }
+thiserror     = "2.0"
 uniffi        = "0.31"

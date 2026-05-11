@@ -8,17 +8,17 @@ const os = require('os');
 const fs = require('fs');
 
 const root  = path.resolve(__dirname, '..');
-const crate = path.join(root, 'rust', 'latex_wrapper');
+const crate = path.join(root, 'rust', 'ratex_wrapper');
 
 const ext    = os.platform() === 'win32'  ? '.dll'
              : os.platform() === 'darwin' ? '.dylib'
              : '.so';
 const prefix = os.platform() === 'win32' ? '' : 'lib';
-const lib = path.join('target', 'debug', `${prefix}latex_wrapper${ext}`);
+const lib = path.join('target', 'debug', `${prefix}ratex_wrapper${ext}`);
 
 // ── Step 1: Build host-native library ────────────────────────────────────────
 console.log('\n[ratex] Building host library…');
-execSync('cargo build --manifest-path rust/latex_wrapper/Cargo.toml', {
+execSync('cargo build --manifest-path rust/ratex_wrapper/Cargo.toml', {
   stdio: 'inherit',
   cwd: root,
 });
@@ -32,7 +32,7 @@ execSync(
 
 // Ensure cpp/generated/ exists
 const generatedDir = path.join(root, 'cpp', 'generated');
-['latex_wrapper.cpp', 'latex_wrapper.hpp'].forEach(file => {
+['ratex_wrapper.cpp', 'ratex_wrapper.hpp'].forEach(file => {
   const dest = path.join(generatedDir, file);
   const src  = path.join(root, 'cpp', file);
   if (!fs.existsSync(dest) && fs.existsSync(src)) {
@@ -45,7 +45,7 @@ const generatedDir = path.join(root, 'cpp', 'generated');
 // ── Step 3: Generate turbo-module glue ────────────────────────────────────────
 console.log('\n[ratex] Generating turbo-module glue…');
 execSync(
-  `npx uniffi-bindgen-react-native generate jsi turbo-module --config ubrn.config.yaml latex_wrapper`,
+  `npx uniffi-bindgen-react-native generate jsi turbo-module --config ubrn.config.yaml ratex_wrapper`,
   { stdio: 'inherit', cwd: root }
 );
 
@@ -104,7 +104,7 @@ execSync(
 // ── Step 6: Generate WASM crate ───────────────────────────────────────────────
 console.log('\n[ratex] Generating WASM crate…');
 execSync(
-  `npx uniffi-bindgen-react-native generate wasm wasm-crate --config ubrn.config.yaml latex_wrapper`,
+  `npx uniffi-bindgen-react-native generate wasm wasm-crate --config ubrn.config.yaml ratex_wrapper`,
   { stdio: 'inherit', cwd: root }
 );
 
@@ -147,7 +147,7 @@ if (fs.existsSync(nativeIndex)) {
   fs.writeFileSync(nativeIndex, fixed, 'utf8');
 }
 
-const webBindings = path.join(root, 'src', 'generated', 'web', 'latex_wrapper.ts');
+const webBindings = path.join(root, 'src', 'generated', 'web', 'ratex_wrapper.ts');
 if (fs.existsSync(webBindings)) {
   let src = fs.readFileSync(webBindings, 'utf8');
   src = src.replace(/wasm-bindgen\/index\.js/g, 'wasm-bindgen/react_native_ratex.js');
@@ -169,13 +169,13 @@ if (fs.existsSync(wasmCargo)) {
 // ── Fix cpp entry backslashes ─────────────────────────────────────────────────
 const cppEntry = path.join(root, 'cpp', 'react-native-ratex.cpp');
 if (fs.existsSync(cppEntry)) {
-  const fixed = fs.readFileSync(cppEntry, 'utf8').replace(/generated\\latex_wrapper/g, 'generated/latex_wrapper');
+  const fixed = fs.readFileSync(cppEntry, 'utf8').replace(/generated\\ratex_wrapper/g, 'generated/ratex_wrapper');
   fs.writeFileSync(cppEntry, fixed, 'utf8');
 }
 
 for (const cppFile of [
-  path.join(root, 'cpp', 'generated', 'latex_wrapper.cpp'),
-  path.join(root, 'cpp', 'latex_wrapper.cpp'),
+  path.join(root, 'cpp', 'generated', 'ratex_wrapper.cpp'),
+  path.join(root, 'cpp', 'ratex_wrapper.cpp'),
 ]) {
   if (fs.existsSync(cppFile)) {
     let cpp = fs.readFileSync(cppFile, 'utf8');

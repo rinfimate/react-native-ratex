@@ -18,8 +18,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: rust/latex_wrapper
-      - run: cargo test --manifest-path rust/latex_wrapper/Cargo.toml --lib
+          workspaces: rust/ratex_wrapper
+      - run: cargo test --manifest-path rust/ratex_wrapper/Cargo.toml
 
   # ── Build Android .a static libs (Ubuntu + NDK cross-compile) ────────────
   build-android:
@@ -33,7 +33,7 @@ jobs:
           targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,i686-linux-android
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: rust/latex_wrapper
+          workspaces: rust/ratex_wrapper
       - run: cargo install cargo-ndk --locked
       - uses: actions/setup-java@v4
         with:
@@ -93,7 +93,7 @@ jobs:
           targets: aarch64-apple-ios,x86_64-apple-ios,aarch64-apple-ios-sim
       - uses: Swatinem/rust-cache@v2
         with:
-          workspaces: rust/latex_wrapper
+          workspaces: rust/ratex_wrapper
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -115,10 +115,10 @@ jobs:
           X86_SIM_DIR="$XCFW/ios-x86_64-simulator"
           FAT_DIR="$XCFW/ios-arm64_x86_64-simulator"
           # Build x86_64 simulator slice (already compiled by rustup target)
-          cargo build --manifest-path rust/latex_wrapper/Cargo.toml --target x86_64-apple-ios --release 2>/dev/null || \
-          cargo build --manifest-path rust/latex_wrapper/Cargo.toml --target x86_64-apple-ios
-          X86_LIB="rust/latex_wrapper/target/x86_64-apple-ios/release/liblatex_wrapper.a"
-          [ -f "$X86_LIB" ] || X86_LIB="rust/latex_wrapper/target/x86_64-apple-ios/debug/liblatex_wrapper.a"
+          cargo build --manifest-path rust/ratex_wrapper/Cargo.toml --target x86_64-apple-ios --release 2>/dev/null || \
+          cargo build --manifest-path rust/ratex_wrapper/Cargo.toml --target x86_64-apple-ios
+          X86_LIB="rust/ratex_wrapper/target/x86_64-apple-ios/release/liblatex_wrapper.a"
+          [ -f "$X86_LIB" ] || X86_LIB="rust/ratex_wrapper/target/x86_64-apple-ios/debug/liblatex_wrapper.a"
           if [ -f "$X86_LIB" ] && [ -f "$ARM64_SIM" ]; then
             mkdir -p "$FAT_DIR"
             lipo -create "$ARM64_SIM" "$X86_LIB" -output "$FAT_DIR/liblatex_wrapper.a"
@@ -161,7 +161,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: |
-            rust/latex_wrapper
+            rust/ratex_wrapper
             rust_modules/wasm
       - run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
       - uses: actions/setup-node@v4
