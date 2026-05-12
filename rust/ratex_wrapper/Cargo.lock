@@ -418,16 +418,8 @@ dependencies = [
 
 [[package]]
 name = "latex_wrapper"
-version = "0.1.0"
-dependencies = [
- "latex_wrapper 0.1.4",
- "uniffi",
-]
-
-[[package]]
-name = "latex_wrapper"
 version = "0.1.4"
-source = "git+https://github.com/rinfimate/RaTeX?branch=main#40ba28bf411e6958aaf8438ff65e648df5fe7025"
+source = "git+https://github.com/rinfimate/RaTeX?branch=main#e64badb50f0b072115c6869d8d675432643626ac"
 dependencies = [
  "console_error_panic_hook",
  "ratex-layout",
@@ -628,7 +620,7 @@ checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 [[package]]
 name = "ratex-font"
 version = "0.1.4"
-source = "git+https://github.com/rinfimate/RaTeX?branch=main#40ba28bf411e6958aaf8438ff65e648df5fe7025"
+source = "git+https://github.com/rinfimate/RaTeX?branch=main#e64badb50f0b072115c6869d8d675432643626ac"
 dependencies = [
  "phf",
  "ratex-types",
@@ -637,7 +629,7 @@ dependencies = [
 [[package]]
 name = "ratex-font-loader"
 version = "0.1.4"
-source = "git+https://github.com/rinfimate/RaTeX?branch=main#40ba28bf411e6958aaf8438ff65e648df5fe7025"
+source = "git+https://github.com/rinfimate/RaTeX?branch=main#e64badb50f0b072115c6869d8d675432643626ac"
 dependencies = [
  "ab_glyph",
  "ratex-font",
@@ -649,7 +641,7 @@ dependencies = [
 [[package]]
 name = "ratex-katex-fonts"
 version = "0.1.4"
-source = "git+https://github.com/rinfimate/RaTeX?branch=main#40ba28bf411e6958aaf8438ff65e648df5fe7025"
+source = "git+https://github.com/rinfimate/RaTeX?branch=main#e64badb50f0b072115c6869d8d675432643626ac"
 dependencies = [
  "rust-embed",
 ]
@@ -657,7 +649,7 @@ dependencies = [
 [[package]]
 name = "ratex-layout"
 version = "0.1.4"
-source = "git+https://github.com/rinfimate/RaTeX?branch=main#40ba28bf411e6958aaf8438ff65e648df5fe7025"
+source = "git+https://github.com/rinfimate/RaTeX?branch=main#e64badb50f0b072115c6869d8d675432643626ac"
 dependencies = [
  "ratex-font",
  "ratex-parser",
@@ -668,7 +660,7 @@ dependencies = [
 [[package]]
 name = "ratex-lexer"
 version = "0.1.4"
-source = "git+https://github.com/rinfimate/RaTeX?branch=main#40ba28bf411e6958aaf8438ff65e648df5fe7025"
+source = "git+https://github.com/rinfimate/RaTeX?branch=main#e64badb50f0b072115c6869d8d675432643626ac"
 dependencies = [
  "ratex-types",
  "serde",
@@ -678,7 +670,7 @@ dependencies = [
 [[package]]
 name = "ratex-parser"
 version = "0.1.4"
-source = "git+https://github.com/rinfimate/RaTeX?branch=main#40ba28bf411e6958aaf8438ff65e648df5fe7025"
+source = "git+https://github.com/rinfimate/RaTeX?branch=main#e64badb50f0b072115c6869d8d675432643626ac"
 dependencies = [
  "fancy-regex",
  "ratex-font",
@@ -695,7 +687,7 @@ dependencies = [
 [[package]]
 name = "ratex-svg"
 version = "0.1.4"
-source = "git+https://github.com/rinfimate/RaTeX?branch=main#40ba28bf411e6958aaf8438ff65e648df5fe7025"
+source = "git+https://github.com/rinfimate/RaTeX?branch=main#e64badb50f0b072115c6869d8d675432643626ac"
 dependencies = [
  "ab_glyph",
  "base64",
@@ -709,7 +701,7 @@ dependencies = [
 [[package]]
 name = "ratex-types"
 version = "0.1.4"
-source = "git+https://github.com/rinfimate/RaTeX?branch=main#40ba28bf411e6958aaf8438ff65e648df5fe7025"
+source = "git+https://github.com/rinfimate/RaTeX?branch=main#e64badb50f0b072115c6869d8d675432643626ac"
 dependencies = [
  "serde",
 ]
@@ -717,10 +709,19 @@ dependencies = [
 [[package]]
 name = "ratex-unicode-font"
 version = "0.1.4"
-source = "git+https://github.com/rinfimate/RaTeX?branch=main#40ba28bf411e6958aaf8438ff65e648df5fe7025"
+source = "git+https://github.com/rinfimate/RaTeX?branch=main#e64badb50f0b072115c6869d8d675432643626ac"
 dependencies = [
  "fontdb",
  "ttf-parser",
+]
+
+[[package]]
+name = "ratex_wrapper"
+version = "0.1.0"
+dependencies = [
+ "latex_wrapper",
+ "thiserror 2.0.18",
+ "uniffi",
 ]
 
 [[package]]
