@@ -7,8 +7,8 @@ pub enum RatexError {
 }
 
 #[uniffi::export]
-pub fn render_to_svg(latex: String, display_mode: bool, font_size: f64) -> Result<String, RatexError> {
-    latex_wrapper::render_to_svg(latex, display_mode, font_size)
+pub fn render_to_svg(latex: String, display_mode: bool, font_size: f64, color: String) -> Result<String, RatexError> {
+    latex_wrapper::render_to_svg(latex, display_mode, font_size, color)
         .map_err(|e| RatexError::RenderError { message: e.to_string() })
 }
 
