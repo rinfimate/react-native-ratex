@@ -59,7 +59,7 @@ export default function LatexView() {
       // Always await it before rendering so the same code works on both platforms.
       await uniffiInitAsync();
       try {
-        setSvg(renderToSvg(String.raw`\frac{-b \pm \sqrt{b^2-4ac}}{2a}`, true, 40));
+        setSvg(renderToSvg(String.raw`\frac{-b \pm \sqrt{b^2-4ac}}{2a}`, true, 40, '#000000'));
       } catch (e) {
         console.error('Render failed:', e);
       }
@@ -86,7 +86,7 @@ const FORMULAS = [
 ];
 
 await uniffiInitAsync();
-const svgs = FORMULAS.map(f => renderToSvg(f, true, 40));
+const svgs = FORMULAS.map(f => renderToSvg(f, true, 40, '#000000'));
 ```
 
 ---
@@ -107,13 +107,13 @@ Hermes (React Native's JS engine) converts certain backslash sequences to contro
 
 ```typescript
 // ✅ Correct — String.raw preserves backslashes literally
-renderToSvg(String.raw`\frac{1}{2} + \frac{1}{3}`, true, 40)
-renderToSvg(String.raw`\theta + \phi = \pi`, true, 40)
-renderToSvg(String.raw`\vec{v} \cdot \vec{u}`, true, 40)
+renderToSvg(String.raw`\frac{1}{2} + \frac{1}{3}`, true, 40, '#000000')
+renderToSvg(String.raw`\theta + \phi = \pi`, true, 40, '#ffffff')  // white for dark mode
+renderToSvg(String.raw`\vec{v} \cdot \vec{u}`, true, 40, '#000000')
 
 // ❌ Wrong — \f becomes form feed (0x0C), \t becomes tab, etc.
-renderToSvg('\\frac{1}{2}', true, 40)   // \f → form feed on Android/iOS
-renderToSvg('\\theta', true, 40)         // \t → tab on Android/iOS
+renderToSvg('\\frac{1}{2}', true, 40, '#000000')   // \f → form feed on Android/iOS
+renderToSvg('\\theta', true, 40, '#000000')          // \t → tab on Android/iOS
 ```
 
 > **Note:** The library includes a Rust-level guard that converts known control characters back to their LaTeX equivalents. For **dynamic strings** (e.g. from an API or user input) where `String.raw` isn't available, use:
@@ -128,17 +128,18 @@ renderToSvg('\\theta', true, 40)         // \t → tab on Android/iOS
 
 | Function | Description |
 |---|---|
-| `renderToSvg(latex, displayMode, fontSize)` | Render LaTeX to a self-contained SVG string |
+| `renderToSvg(latex, displayMode, fontSize, color)` | Render LaTeX to a self-contained SVG string |
 | `renderToView(latex, displayMode)` | Render LaTeX to a JSON DisplayList string |
 | `uniffiInitAsync()` | Load WASM on web; no-op on native. Call once before rendering |
 
-### `renderToSvg(latex, displayMode, fontSize)`
+### `renderToSvg(latex, displayMode, fontSize, color)`
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `latex` | `string` | LaTeX source — use `String.raw` |
 | `displayMode` | `boolean` | `true` for block/display math (`$$`), `false` for inline (`$`) |
 | `fontSize` | `number` | Font size in user units (recommended: 40) |
+| `color` | `string` | Hex color of the formula e.g. `"#000000"` (black) or `"#ffffff"` (white) |
 
 Returns a self-contained SVG string with embedded glyph outlines. No external fonts required. Pass directly to `<SvgXml>` from `react-native-svg`.
 
